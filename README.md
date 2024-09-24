@@ -14,25 +14,25 @@ This repository is my submission for the Fetch Backend Internship based on [this
 
 ## Getting Started
 
-### Install dependencies
+### 1) Install dependencies
 
 ```sh
 npm install
 ```
 
-### Build
+### 2) Build
 
 ```sh
 npm run build
 ```
 
-### Generate Prisma Client and SQLite file
+### 3) Generate Prisma Client and SQLite file
 
 ```sh
 npm run prisma:push
 ```
 
-### Start
+### 4) Start
 
 ```sh
 npm start
