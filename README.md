@@ -2,6 +2,10 @@
 
 This repository is my submission for the Fetch Backend Internship based on [this document](https://fetch-hiring.s3.us-east-1.amazonaws.com/points-intern.pdf)
 
+> Note: The payment-status branch adds a status to the payments table. This allows for more efficient querying for payments. Closed payments are payments where the points have been completely spent.
+
+> This branch is the current solution for the challenge, as the payment-status branch does not always output the same data for the `GET /balance` route.
+
 ## Tech
 
 -   TypeScript
