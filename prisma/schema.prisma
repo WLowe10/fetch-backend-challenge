@@ -1,0 +1,33 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:db.sqlite"
+}
+
+model Payer {
+    // the name will be the primary key for simplicity. Since our system expects unique payer names, it is a natural primary key
+    name String @id
+
+    // a payer could have more data, like email, phone, etc.
+
+    payments Payment[]
+}
+
+model Payment {
+    id         Int    @id @default(autoincrement())
+    payer_name String
+
+    // amout of points
+    amount Int
+
+    // since points must be spent oldest to newest, we will use "spent" to track the amount of points spent, while still keeping the original payment.
+    spent Int      @default(0)
+    date  DateTime
+
+    payer Payer @relation(fields: [payer_name], references: [name])
+
+    @@map("payments")
+}

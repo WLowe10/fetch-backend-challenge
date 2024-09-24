@@ -1,0 +1,42 @@
+Summary
+
+Instructions are in /README.md
+
+1) Why did you choose the tools, libraries, and language you used for the coding exercise?
+
+- I chose Node JS as a runtime for server side Javascript. I am very comfortable with TypeScript and Node.
+
+- I chose Fastify as a server library. I've commonly used Express in the past, but Fastify is faster, modern, and is more actively maintained.
+
+- Prisma + SQLite for a database and ORM. I wanted to persist the payments for this project using SQLite instead of in memory.
+
+
+2) What are the advantages and disadvantages of your solution?
+
+Advantages:
+- SQLite is very fast and adds a structure to this application's data. Also, since the payments aren't stored in memory, the state is persisted between runs.
+
+- Using SQLite allows querying payments, instead of having to filter all of the payments manually stored in memory.
+
+Disadvantages:
+- For the simplicity of the test case, using SQLite + Prisma may not be necessary.
+
+- There is a need to transpile the TypeScript source files and generate the prisma client. This would be done in CI/CD
+
+
+3) What has been a favorite school/personal project thus far? What about it that challenged you?
+
+I recently finished working on my first deployed B2B SaaS application, Sweetreply! (https://www.sweetreply.io/)
+
+Sweetreply is a marketing tool that scrapes Reddit each minute for new posts relevant to a user's product, and automatically sends a promotional and helpful reply from one of the Reddit accounts in the Sweetreply pool.
+
+This was also one of the most complex apps I've built. However, it was a great experience putting my skills to work and seeing the app come toghether!
+
+Challenges/Solutions:
+- Scraping. Sweetreply scrapes each and every Reddit post on the platform each minute. Interestingly, I found that there are about 700-1000 posts per minute being published on the platform. This allowed near instant post detection for my users based on their configured keywords.
+
+- Pool of Reddit accounts. Allowed the replies to be cycled between these Reddit accounts. The pool also stored the browser session so the accounts would not have to sign in before each reply. Each account also used a dedicated proxy.
+
+- Job queue for Reddit replies. Allowed scheduling and retrying replies.
+
+- Automation. The actual automation of submitting a reply required automation via a headless browser (through puppeteer) and circumventing Reddit's bot detection.
