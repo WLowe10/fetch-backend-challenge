@@ -19,8 +19,15 @@ const spendPointsSchema = z.object({
 
 export async function mainController(fastify: FastifyInstance) {
 	fastify.get("/balance", async (request, reply) => {
+		// we need to see all payers as well, even if their balance is 0
+		const payers = await prisma.payer.findMany();
+
 		// a map storing the aggregated points for each payer
 		const balanceMap = new Map<string, number>();
+
+		for (const payer of payers) {
+			balanceMap.set(payer.name, 0);
+		}
 
 		const payments = await prisma.payment.findMany({
 			where: {
