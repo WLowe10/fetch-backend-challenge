@@ -26,8 +26,12 @@ model Payment {
     amount Int
 
     // since points must be spent oldest to newest, we will use "spent" to track the amount of points spent, while still keeping the original payment.
-    spent Int      @default(0)
-    date  DateTime
+    spent Int @default(0)
+
+    // boolean representing if a payment has been closed. (amount == spent)
+    is_closed Boolean @default(false)
+
+    date DateTime
 
     payer Payer @relation(fields: [payer_name], references: [name])
 

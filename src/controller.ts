@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { prisma } from "./lib/prisma.js";
-import { aggregatePaymentsBalance, getRemainingPoints, paymentIsClosed } from "./lib/payments.js";
+import { aggregatePaymentsBalance, getRemainingPoints } from "./lib/payments.js";
 import type { FastifyInstance } from "fastify";
 
 const pointsValueSchema = z.number().int();
@@ -19,16 +19,28 @@ const spendPointsSchema = z.object({
 
 export async function mainController(fastify: FastifyInstance) {
 	fastify.get("/balance", async (request, reply) => {
+		// we need to see all payers as well, even if their balance is 0
+		const payers = await prisma.payer.findMany();
+
+		// a map storing the aggregated points for each payer
 		const balanceMap = new Map<string, number>();
 
-		const payments = await prisma.payment.findMany();
+		for (const payer of payers) {
+			balanceMap.set(payer.name, 0);
+		}
+
+		const payments = await prisma.payment.findMany({
+			where: {
+				is_closed: false,
+			},
+		});
 
 		for (const payment of payments) {
 			// get the aggregated points
 			const points = balanceMap.get(payment.payer_name) ?? 0;
 
 			// add to the aggregated points
-			balanceMap.set(payment.payer_name, points + payment.amount - payment.spent);
+			balanceMap.set(payment.payer_name, points + getRemainingPoints(payment));
 		}
 
 		// serialize the map into a JS object. Fastify will automatically convert this to a JSON string
@@ -62,9 +74,11 @@ export async function mainController(fastify: FastifyInstance) {
 
 		// if this is a negative addition, we need to deduct points from a previous payment of this payer
 		if (data.points < 0) {
+			// get all of the payer's payments that are not closed, from oldest to newest
 			const payerPayments = await prisma.payment.findMany({
 				where: {
 					payer_name: payer.name,
+					is_closed: false,
 				},
 				orderBy: {
 					date: "asc",
@@ -88,10 +102,6 @@ export async function mainController(fastify: FastifyInstance) {
 					break;
 				}
 
-				if (paymentIsClosed(payment)) {
-					continue;
-				}
-
 				const amountRemaining = getRemainingPoints(payment);
 				const amountToDeduct = Math.min(amountRemaining, remainingPointsToDeduct);
 
@@ -105,6 +115,7 @@ export async function mainController(fastify: FastifyInstance) {
 							// atomically increment the spent points
 							increment: amountToDeduct,
 						},
+						is_closed: amountRemaining === amountToDeduct,
 					},
 				});
 			}
@@ -129,10 +140,13 @@ export async function mainController(fastify: FastifyInstance) {
 
 		const data = dataResult.data;
 
-		// select all payments, ordered by date ascending (oldest first)
+		// select all payments that aren't closed, ordered by date ascending (oldest first)
 		const payments = await prisma.payment.findMany({
 			orderBy: {
 				date: "asc",
+			},
+			where: {
+				is_closed: false,
 			},
 		});
 
@@ -154,10 +168,6 @@ export async function mainController(fastify: FastifyInstance) {
 				break;
 			}
 
-			if (paymentIsClosed(payment)) {
-				continue;
-			}
-
 			const amountRemaining = getRemainingPoints(payment);
 			const amountToDeduct = Math.min(amountRemaining, remainingPoints);
 
@@ -172,6 +182,7 @@ export async function mainController(fastify: FastifyInstance) {
 						// atomically increment the spent points
 						increment: amountToDeduct,
 					},
+					is_closed: amountRemaining === amountToDeduct,
 				},
 			});
 

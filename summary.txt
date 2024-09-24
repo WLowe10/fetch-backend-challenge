@@ -18,6 +18,8 @@ Advantages:
 
 - Using SQLite allows querying payments, instead of having to filter all of the payments manually stored in memory.
 
+- Payments can be open or closed (via the is_closed column). This allows querying only for open payments when calculating balances, increasing efficiency.
+
 Disadvantages:
 - For the simplicity of the test case, using SQLite + Prisma may not be necessary.
 
