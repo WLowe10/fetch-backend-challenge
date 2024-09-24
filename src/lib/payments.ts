@@ -3,14 +3,6 @@
 import type { Payment } from "@prisma/client";
 
 /**
- * Checks if a payment is closed. (amount === spent)
- *
- * @param {Payment} payment
- * @returns boolean representing if the payment is closed
- */
-export const paymentIsClosed = (payment: Payment) => payment.amount === payment.spent;
-
-/**
  * Gets the remaining points available in a payment
  *
  * @param {Payment} payment
